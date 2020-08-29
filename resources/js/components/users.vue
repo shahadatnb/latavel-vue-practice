@@ -56,7 +56,7 @@
         <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form @submit.prevent="editMode ? editUser() : createUser()">
+                    <form @submit.prevent="editMode ? updateUser() : createUser()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -117,15 +117,31 @@
                 editMode:true,
                 users:{},
                 form: new Form({
+                    id:'',
                     name:'',
                     email:'',
+                    bio:'',
+                    type:'',
                     password:'' 
                 })
             }
         },
         methods:{
-            editUser(){
-
+            updateUser(){
+                this.$Progress.start();
+                this.form.put('api/user/'+this.form.id)
+                .then(()=>{
+                    this.loadUsers();
+                    $('#addUserModal').modal('hide');
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'User created successfully'
+                    });
+                    this.$Progress.finish();
+                })
+                .catch(()=>{
+                    this.$Progress.fail();
+                });
             },
             editUserModal(user){
                 this.editMode = true;
@@ -137,6 +153,25 @@
                 this.editMode = false;
                 this.form.reset();
                 $('#addUserModal').modal('show');
+            },
+            loadUsers(){
+                axios.get("api/user").then(({ data }) => (this.users = data.data) );
+            },
+            createUser(){
+                this.$Progress.start();
+                this.form.post('api/user')
+                .then(()=>{
+                    this.loadUsers();
+                    $('#addUserModal').modal('hide');
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'User created successfully'
+                    });
+                    this.$Progress.finish();
+                })
+                .catch(()=>{
+                    this.$Progress.fail();
+                });
             },
             deleteUser(id){
                 Swal.fire({
@@ -160,25 +195,6 @@
                     })
                 
                 })
-            },
-            loadUsers(){
-                axios.get("api/user").then(({ data }) => (this.users = data.data) );
-            },
-            createUser(){
-                this.$Progress.start();
-                this.form.post('api/user')
-                .then(()=>{
-                    this.loadUsers();
-                    $('#addUserModal').modal('hide');
-                    Toast.fire({
-                        icon: 'success',
-                        title: 'User created successfully'
-                    });
-                    this.$Progress.finish();
-                })
-                .catch(()=>{
-                    this.$Progress.fail();
-                });
             }
         },
         created() {

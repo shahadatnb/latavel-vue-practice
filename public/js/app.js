@@ -1931,14 +1931,34 @@ __webpack_require__.r(__webpack_exports__);
       editMode: true,
       users: {},
       form: new Form({
+        id: '',
         name: '',
         email: '',
+        bio: '',
+        type: '',
         password: ''
       })
     };
   },
   methods: {
-    editUser: function editUser() {},
+    updateUser: function updateUser() {
+      var _this = this;
+
+      this.$Progress.start();
+      this.form.put('api/user/' + this.form.id).then(function () {
+        _this.loadUsers();
+
+        $('#addUserModal').modal('hide');
+        Toast.fire({
+          icon: 'success',
+          title: 'User created successfully'
+        });
+
+        _this.$Progress.finish();
+      })["catch"](function () {
+        _this.$Progress.fail();
+      });
+    },
     editUserModal: function editUserModal(user) {
       this.editMode = true;
       this.form.reset();
@@ -1949,27 +1969,6 @@ __webpack_require__.r(__webpack_exports__);
       this.editMode = false;
       this.form.reset();
       $('#addUserModal').modal('show');
-    },
-    deleteUser: function deleteUser(id) {
-      var _this = this;
-
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      }).then(function (result) {
-        _this.form["delete"]('api/user/' + id).then(function () {
-          Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
-
-          _this.loadUsers();
-        })["catch"](function () {
-          Swal('Faild', 'There was something wringe.', 'warning');
-        });
-      });
     },
     loadUsers: function loadUsers() {
       var _this2 = this;
@@ -1995,6 +1994,27 @@ __webpack_require__.r(__webpack_exports__);
         _this3.$Progress.finish();
       })["catch"](function () {
         _this3.$Progress.fail();
+      });
+    },
+    deleteUser: function deleteUser(id) {
+      var _this4 = this;
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(function (result) {
+        _this4.form["delete"]('api/user/' + id).then(function () {
+          Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+
+          _this4.loadUsers();
+        })["catch"](function () {
+          Swal('Faild', 'There was something wringe.', 'warning');
+        });
       });
     }
   },
@@ -63255,7 +63275,7 @@ var render = function() {
                 on: {
                   submit: function($event) {
                     $event.preventDefault()
-                    _vm.editMode ? _vm.editUser() : _vm.createUser()
+                    _vm.editMode ? _vm.updateUser() : _vm.createUser()
                   }
                 }
               },
